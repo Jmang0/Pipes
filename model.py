@@ -47,7 +47,7 @@ def n1(node):
 
     global node1
     node1 = node
-    node1.set_color(Color.GREY)
+    node1.highlight(Color.YELLOW,20)
     print('Click end of pipe')
     register_click_listener(n2)
 
@@ -60,7 +60,7 @@ def n2(node):
     node2 = node
 
     if graph.adjacent(node1,node2):
-        node2.set_color(Color.GREY)
+        node2.highlight(Color.YELLOW,15)
         pipe = graph.edges_between(node1,node2)[0]
         print(f'How far from {node1} is the break?')
         total = float(pipe.weight())
@@ -78,9 +78,6 @@ def n2(node):
 
         graph.add_edge(node1,sensor,weight=length1)
         graph.add_edge(sensor,node2,weight=length2)
-
-        node1.set_color(Color.DARK_GREY)
-        node2.set_color(Color.DARK_GREY)
 
         register_click_listener(_)
 
