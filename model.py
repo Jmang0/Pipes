@@ -16,7 +16,7 @@ def insert_node(middle_node,edge):
 
     # Get user input on where the node should be inserted
     print(f'How far from {node1} is the sensor?')
-    inp = input(f"Enter a distance between 0 and {total} meters, 'half' or 'random': ")
+    inp = 'half' #input(f"Enter a distance between 0 and {total} meters, 'half' or 'random': ")
     if inp == 'half':
         length1 = total/2
     elif inp == 'random':
@@ -107,7 +107,7 @@ def sensor2(node):
 
         # Check whther to add another sensor
         print()
-        if input('Add another sensor? (y/n) ') == 'y':
+        if False:#input('Add another sensor? (y/n) ') == 'y':
             print('Click start of pipe')
             register_click_listener(sensor1)
         else:
@@ -141,8 +141,31 @@ def break2(node):
         brek.set_color(Color.RED)
 
         insert_node(brek,pipe)
+        register_click_listener(_)
+        spread([brek])
 
     else:
         print('Junctions must be adjacent, choose the end of the pipe again')
+
+
+def spread(nodes):
+    print(nodes)
+    if not nodes:
+        return None
+
+    pause(1000)
+
+    next = []
+    BLUE = Color(51,51,255)
+
+    for node in nodes:
+        for edge in node.incident_edges():
+            if not edge.attribute('flowed'):
+                edge.traverse(initial_node=node, color=BLUE, keep_path=True)
+                edge.set_attribute('flowed',True)
+
+                next.append(edge.other_node(node))
+
+    spread(next)
 
 begin_pynode(run)
