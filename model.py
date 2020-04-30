@@ -2,16 +2,15 @@ import csv
 from pynode.main import *
 from random import random
 from time import time
+from copy import deepcopy
 
-slowmo = 10
-testing = False
+slowmo = 10 # Speed to show propogation at
+testing = True #If testing is True, it skips user typing input
 
+#---------- MODEL ----------
+# Open data
 with open("pipes.csv","r") as f:
     data = list(csv.reader(f))[1:]
-
-def get_attributes(edge):
-    attrs = ['flowed','material','year','elasticity','wall_thickness','possians_ratio','wave_speed']
-    return {attr: edge.attribute(attr) for attr in attrs}
 
 def insert_node(middle_node,edge,name):
     node1 = edge.source()
@@ -44,9 +43,8 @@ def insert_node(middle_node,edge,name):
     e2 = Edge(middle_node,node2,weight=length2)
 
     # Transfer the attributes
-    for name, value in get_attributes(edge).items():
-        e1.set_attribute(name,value)
-        e2.set_attribute(name,value)
+    e1._attributes = deepcopy(edge._attributes)
+    e2._attributes = deepcopy(edge._attributes)
 
     # Remove the old edge, add the new edges
     graph.remove_edge(edge)
@@ -154,6 +152,8 @@ def break2(node):
 
         insert_node(brek, pipe,'break')
         register_click_listener(_)
+
+        #---------- ALGORITHM ----------
         start_time = time()
         spread(brek)
 
@@ -164,23 +164,37 @@ def break2(node):
 def spread(node):
     global start_time,slowmo
 
+    # Visually indicate the water has reached this node
     node.highlight(color=Color.BLUE,size=node.size()*1.5)
     node.set_color(Color.BLUE)
+
+    # If the node is a sensor, display the time taken to reach it
     if node.id().startswith('Sensor '):
         print(f'Reached {node.id()} after {time()-start_time} seconds')
 
+    # For every incident edge
+        # If water hasn't flowed through it
+            # Calculate how long it will take
+            # Set a call to that function after that amount of time
+
+    # For every incident edge
     for edge in node.incident_edges():
+        # If water hasn't flowed through it
         if not edge.attribute('flowed'):
             edge.set_attribute('flowed',True)
 
+            # Calculate how long it will take
             wave_time = edge.weight()/edge.attribute('wave_speed')
             wait_time = wave_time*1000*slowmo
 
+            #Traversal animation takes about 500ms
             if wait_time > 500:
+
                 delay(edge.traverse, wait_time-500, args=[node, Color.BLUE, True])
             else:
                 edge.traverse(initial_node=node, color=Color.BLUE, keep_path=True)
-            #Continue spreading
+
+            # Set a call to that function after that amount of time
             delay(spread, wait_time, args=[edge.other_node(node)])
 
 
